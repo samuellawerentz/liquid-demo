@@ -1,15 +1,30 @@
 import LiquidGlass from 'liquid-glass-react'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
 
 function App() {
-  const [position, setPosition] = useState({ x: 500, y: -100 })
+  const [position, setPosition] = useState({ x: 0, y: -100 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const dragRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Center the x position based on container width
+  useEffect(() => {
+    const updatePosition = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth
+        setPosition(prev => ({ ...prev, x: containerWidth / 2 }))
+      }
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    return () => window.removeEventListener('resize', updatePosition)
+  }, [])
 
   // LiquidGlass controls state
   const [text, setText] = useState('Are you building AI Agents?')
@@ -48,6 +63,7 @@ function App() {
         <div className='grid grid-cols-1 lg:grid-cols-10 gap-6 h-full'>
           {/* Main Content Area - 70% */}
           <div 
+            ref={containerRef}
             className='lg:col-span-7 relative min-h-[600px] overflow-hidden'
             style={{
               backgroundImage: `url(${backgroundUrl})`,
